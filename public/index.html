@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e3d38">
+  <title>할리갈리 온라인</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="conn" class="conn hidden" role="status">연결이 끊겼어요. 다시 연결하는 중…</div>
+
+  <header class="topbar">
+    <span class="brand">할리갈리</span>
+    <div class="topbar-actions">
+      <button class="chip-btn" id="btn-sound" type="button" aria-pressed="false">효과음 켬</button>
+      <button class="chip-btn" id="btn-rules" type="button">규칙</button>
+      <button class="chip-btn hidden" id="btn-leave" type="button">나가기</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 접속 중 -->
+    <section id="screen-loading" class="screen center-msg">
+      <p>자리를 찾는 중이에요…</p>
+    </section>
+
+    <!-- 홈 -->
+    <section id="screen-home" class="screen home hidden">
+      <div class="hero">
+        <h1 class="hero-title">같은 과일이 딱 5개면,<br>종을 치세요</h1>
+        <p class="hero-sub">2~6명이 브라우저로 모여 하는 할리갈리. 방을 만들고 코드만 알려주면 바로 시작해요.</p>
+        <div class="hero-demo" id="hero-demo" aria-hidden="true"></div>
+      </div>
+
+      <form id="form-home" class="panel form-home" autocomplete="off">
+        <p class="invite-note hidden" id="invite-note"></p>
+        <label for="name">내 이름</label>
+        <input id="name" maxlength="12" placeholder="친구들에게 보일 이름" required>
+
+        <div class="actions">
+          <button type="button" class="btn primary" id="btn-create">새 방 만들기</button>
+        </div>
+
+        <label for="code">방 코드로 입장</label>
+        <div class="join-row">
+          <input id="code" maxlength="4" placeholder="예: KQXT" autocapitalize="characters" spellcheck="false">
+          <button type="button" class="btn" id="btn-join">입장</button>
+        </div>
+        <p class="form-error" id="home-error" role="alert"></p>
+      </form>
+    </section>
+
+    <!-- 대기실 -->
+    <section id="screen-lobby" class="screen lobby hidden">
+      <div class="panel">
+        <div class="code-row">
+          <div>
+            <div class="code-label">방 코드</div>
+            <div class="code" id="lobby-code">----</div>
+          </div>
+          <button class="btn" id="btn-copy" type="button">초대 링크 복사</button>
+        </div>
+        <p class="hint hidden" id="localhost-hint"></p>
+
+        <ul id="lobby-players" class="player-list"></ul>
+
+        <div class="setting">
+          <label for="sel-turn">자동 뒤집기</label>
+          <select id="sel-turn"></select>
+        </div>
+        <p class="muted small">내 차례에 이 시간 안에 카드를 뒤집지 않으면 자동으로 뒤집혀요.</p>
+
+        <button class="btn primary big" id="btn-start" type="button">게임 시작</button>
+        <p class="muted" id="lobby-wait"></p>
+      </div>
+    </section>
+
+    <!-- 게임 -->
+    <section id="screen-game" class="screen game hidden">
+      <div id="opponents" class="opponents"></div>
+
+      <div class="center">
+        <div class="turn-info" id="turn-info"></div>
+        <button id="bell" class="bell" type="button" data-act="bell" aria-label="종 치기 (스페이스바)">
+          <span class="bell-icon" aria-hidden="true">🔔</span>
+          <span class="bell-label">종!</span>
+        </button>
+        <div class="pot-info" id="pot-info"></div>
+      </div>
+
+      <div class="mine">
+        <div id="me"></div>
+        <button id="flip" class="flip-btn" type="button" data-act="flip">카드 뒤집기</button>
+        <p class="keys">스페이스바로 종, F 키로 카드 뒤집기</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="banner" class="banner" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="end-overlay" class="overlay hidden">
+    <div class="overlay-card">
+      <h2 id="end-title"></h2>
+      <p id="end-sub"></p>
+      <div class="overlay-actions">
+        <button class="btn primary" id="btn-rematch" type="button">같은 방에서 다시 하기</button>
+        <button class="btn" id="btn-end-leave" type="button">나가기</button>
+      </div>
+      <p class="muted" id="end-wait"></p>
+    </div>
+  </div>
+
+  <dialog id="dlg-rules">
+    <form method="dialog">
+      <h2>할리갈리 규칙</h2>
+      <ol>
+        <li>카드는 모두 56장이에요. 과일은 딸기, 바나나, 라임, 자두 네 가지이고, 한 장에는 한 종류의 과일이 1~5개 그려져 있어요.</li>
+        <li>카드를 똑같이 나눠 갖고, 차례가 오면 내 더미 맨 위 카드를 뒤집어 내 앞에 펼쳐 놓아요.</li>
+        <li>모든 사람이 펼쳐 놓은 <b>맨 위 카드</b>를 보세요. 같은 과일의 개수를 다 더해서 <b>정확히 5개</b>가 되면 종을 쳐요.</li>
+        <li>가장 먼저 맞게 친 사람이 테이블에 펼쳐진 카드를 전부 가져가요.</li>
+        <li>잘못 쳤다면 다른 플레이어에게 카드를 한 장씩 줘야 해요.</li>
+        <li>내 차례에 뒤집을 카드가 없으면 탈락이에요. 마지막까지 남은 사람이 우승해요.</li>
+      </ol>
+      <p class="small">이 게임의 약속: 누가 맞게 친 직후에 살짝 늦게 친 사람은 벌칙 없이 무시돼요.</p>
+      <button class="btn primary">닫기</button>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
